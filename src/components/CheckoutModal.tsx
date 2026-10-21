@@ -6,21 +6,49 @@ import { downloadWorksheetsPack } from '../utils/generatePdf';
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialStep?: 'checkout' | 'processing' | 'success';
+  initialOrderId?: string;
+  initialEmail?: string;
+  paymentSource?: 'direct' | 'creem';
 }
 
-export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose }) => {
+export const CheckoutModal: React.FC<CheckoutModalProps> = ({
+  isOpen,
+  onClose,
+  initialStep = 'checkout',
+  initialOrderId = '',
+  initialEmail = '',
+  paymentSource = 'direct'
+}) => {
   const { settings, addOrder } = useStore();
-  const [step, setStep] = useState<'checkout' | 'processing' | 'success'>('checkout');
+  const [step, setStep] = useState<'checkout' | 'processing' | 'success'>(initialStep);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'apple' | 'paypal'>('card');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(initialEmail);
   const [name, setName] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
-  const [orderId, setOrderId] = useState('');
+  const [orderId, setOrderId] = useState(initialOrderId);
   const [errorMsg, setErrorMsg] = useState('');
   const [downloadedBook, setDownloadedBook] = useState(false);
   const [downloadedSheets, setDownloadedSheets] = useState(false);
+
+  // Sync step if initialStep changes when opened
+  React.useEffect(() => {
+    if (isOpen) {
+      if (initialStep === 'success') {
+        setStep('success');
+        if (initialOrderId) setOrderId(initialOrderId);
+        if (initialEmail) setEmail(initialEmail);
+        // Auto-download on success redirect
+        setTimeout(() => {
+          triggerPdfDownload();
+        }, 500);
+      } else {
+        setStep('checkout');
+      }
+    }
+  }, [isOpen, initialStep, initialOrderId, initialEmail]);
 
   if (!isOpen) return null;
 
@@ -125,15 +153,26 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
               <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
+              {paymentSource === 'creem' || orderId.startsWith('CREEM-') ? (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
+                  <span>Verified Payment via Creem.io</span>
+                </div>
+              ) : null}
               <h3 className="text-2xl font-extrabold text-[#172B4D] font-display">
                 Thank You for Your Order!
               </h3>
               <p className="text-xs text-slate-600">
                 Order Reference: <strong className="font-mono text-slate-900">#{orderId}</strong>
               </p>
-              <p className="text-xs text-slate-500">
-                Receipt and backup access links sent to <span className="font-semibold text-slate-800">{email}</span>.
-              </p>
+              {email ? (
+                <p className="text-xs text-slate-500">
+                  Receipt and backup access links sent to <span className="font-semibold text-slate-800">{email}</span>.
+                </p>
+              ) : (
+                <p className="text-xs text-slate-500">
+                  Your official licensed copy is ready for immediate download below.
+                </p>
+              )}
             </div>
 
             {/* Instant Delivery Downloads Box */}

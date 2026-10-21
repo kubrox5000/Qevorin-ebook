@@ -20,13 +20,18 @@ import {
   Eye,
   FileText,
   LogOut,
-  KeyRound
+  KeyRound,
+  CreditCard,
+  Copy,
+  CheckCircle2,
+  Globe,
+  Sparkles
 } from 'lucide-react';
 import { useStore, Order } from '../context/StoreContext';
 import { Chapter } from '../config/product';
 import { AdminLoginModal } from './AdminLoginModal';
 
-type Tab = 'overview' | 'orders' | 'product' | 'content' | 'settings';
+type Tab = 'overview' | 'orders' | 'product' | 'payment' | 'content' | 'settings';
 
 export const AdminDashboard: React.FC = () => {
   const {
@@ -64,6 +69,7 @@ export const AdminDashboard: React.FC = () => {
   // Admin Security Form State
   const [adminEmailInput, setAdminEmailInput] = useState(adminCredentials.email);
   const [adminPasswordInput, setAdminPasswordInput] = useState('');
+  const [copiedSuccessUrl, setCopiedSuccessUrl] = useState(false);
 
   if (!isAdminOpen) return null;
 
@@ -243,6 +249,21 @@ export const AdminDashboard: React.FC = () => {
           >
             <Tag className="w-4 h-4" />
             <span>Product & Pricing (${settings.price})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('payment')}
+            className={`py-3 px-4 text-xs font-semibold border-b-2 flex items-center gap-2 transition-colors cursor-pointer whitespace-nowrap ${
+              activeTab === 'payment'
+                ? 'border-[#2A9D8F] text-[#2A9D8F]'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <CreditCard className="w-4 h-4" />
+            <span>Payment & Creem.io</span>
+            {settings.useCreemCheckout && settings.creemCheckoutUrl ? (
+              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+            ) : null}
           </button>
 
           <button
@@ -676,7 +697,252 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 4: CONTENT & COPY */}
+          {/* TAB 4: PAYMENT & CREEM.IO GATEWAY */}
+          {activeTab === 'payment' && (
+            <div className="max-w-3xl space-y-6">
+              {/* Status & Toggle Card */}
+              <div className="p-6 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/60 pb-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="w-5 h-5 text-[#2A9D8F]" />
+                      <h3 className="text-base font-bold text-white font-display">
+                        Creem.io Payment Gateway / بوابة دفع Creem
+                      </h3>
+                    </div>
+                    <p className="text-xs text-slate-400">
+                      Enable real global payments via Card, Apple Pay, Google Pay & local methods through Creem.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-medium text-slate-300">
+                      Creem Mode:
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nextState = !settings.useCreemCheckout;
+                        updateSettings({ useCreemCheckout: nextState });
+                        showToast(nextState ? 'Creem checkout enabled!' : 'Creem checkout disabled (built-in modal active).');
+                      }}
+                      className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors cursor-pointer ${
+                        settings.useCreemCheckout ? 'bg-[#2A9D8F]' : 'bg-slate-700'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          settings.useCreemCheckout ? 'translate-x-7' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                    <span
+                      className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${
+                        settings.useCreemCheckout
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          : 'bg-slate-700 text-slate-400'
+                      }`}
+                    >
+                      {settings.useCreemCheckout ? 'Active' : 'Disabled'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Status Notice */}
+                {settings.useCreemCheckout ? (
+                  <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-800/40 text-xs text-emerald-300 flex items-start gap-2.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div className="leading-relaxed">
+                      <strong className="text-white">Creem Checkout is Active:</strong> When customers click any "Get Smart Money" or "Buy Now" CTA on the landing page, they will be redirected to your official Creem checkout page for secure payment.
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-400 flex items-start gap-2.5">
+                    <Sparkles className="w-4 h-4 text-[#E9C46A] shrink-0 mt-0.5" />
+                    <div className="leading-relaxed">
+                      <strong className="text-slate-300">Built-in Checkout Modal is Active:</strong> Customers currently complete their order and receive instant downloads via the high-converting simulated storefront modal. Enable the switch above once you have created your product on Creem.io.
+                    </div>
+                  </div>
+                )}
+
+                {/* Creem Checkout URL Input */}
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-200 block">
+                    Creem Product Checkout Link / رابط الدفع من Creem.io
+                  </label>
+                  <p className="text-[11px] text-slate-400">
+                    Paste the Checkout Link or Payment Link generated by your Creem.io product dashboard (e.g., <code className="text-slate-300 font-mono">https://checkout.creem.io/...</code> or <code className="text-slate-300 font-mono">https://creem.io/...</code>).
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="url"
+                      placeholder="https://checkout.creem.io/p/prod_xxxx..."
+                      value={settings.creemCheckoutUrl || ''}
+                      onChange={(e) => updateSettings({ creemCheckoutUrl: e.target.value })}
+                      className="flex-1 px-3.5 py-2.5 text-sm bg-slate-900 border border-slate-700 rounded-xl text-white font-mono focus:outline-none focus:border-[#2A9D8F]"
+                    />
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          showToast('Creem settings saved successfully!');
+                        }}
+                        className="px-4 py-2.5 text-xs font-bold text-white bg-[#2A9D8F] hover:bg-[#218376] rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
+                      >
+                        <Check className="w-4 h-4" />
+                        <span>Save Link</span>
+                      </button>
+
+                      {settings.creemCheckoutUrl && (
+                        <a
+                          href={settings.creemCheckoutUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3.5 py-2.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Test Link</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Return / Success URL for Creem Dashboard */}
+                <div className="p-4 rounded-xl bg-slate-900 border border-slate-700/80 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                      <Globe className="w-3.5 h-3.5 text-[#E9C46A]" />
+                      <span>Return / Success URL (لإعدادها داخل منصة Creem):</span>
+                    </label>
+                    <button
+                      onClick={() => {
+                        const url = `${window.location.origin}/?success=true`;
+                        navigator.clipboard.writeText(url);
+                        setCopiedSuccessUrl(true);
+                        showToast('Success URL copied to clipboard!');
+                        setTimeout(() => setCopiedSuccessUrl(false), 2500);
+                      }}
+                      className="text-xs text-[#2A9D8F] hover:text-[#218376] font-semibold flex items-center gap-1 cursor-pointer"
+                    >
+                      {copiedSuccessUrl ? (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Copy URL</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 font-mono text-xs text-emerald-400 break-all select-all">
+                    {typeof window !== 'undefined' ? `${window.location.origin}/?success=true` : 'https://your-domain.netlify.app/?success=true'}
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    ضع هذا الرابط في خانة <strong>Success / Redirect URL</strong> في إعدادات المنتج داخل Creem.io. بعد أن يُتم العميل الدفع في Creem، سيتم تحويله تلقائياً لهذا الرابط ويبدأ تحميل كتاب PDF فوراً وبشكل تلقائي!
+                  </p>
+                </div>
+              </div>
+
+              {/* Step-by-Step Connection Guide */}
+              <div className="p-6 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-4">
+                <h4 className="text-sm font-bold text-white flex items-center gap-2 font-display">
+                  <span>دليل ربط Creem.io خطوة بخطوة / Step-by-Step Setup Guide</span>
+                </h4>
+
+                <div className="space-y-3 text-xs">
+                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-[#172B4D] text-[#E9C46A] font-bold flex items-center justify-center shrink-0 text-xs">
+                      1
+                    </div>
+                    <div>
+                      <strong className="text-white block mb-0.5">إنشاء حساب على Creem.io</strong>
+                      <span className="text-slate-400">
+                        توجه إلى <a href="https://www.creem.io" target="_blank" rel="noopener noreferrer" className="text-[#2A9D8F] underline">creem.io</a> وسجل حسابك، وقم بربط بيانات استلام الأموال (Bank Account / Stripe Connect).
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-[#172B4D] text-[#E9C46A] font-bold flex items-center justify-center shrink-0 text-xs">
+                      2
+                    </div>
+                    <div>
+                      <strong className="text-white block mb-0.5">إنشاء المنتج (Create Product)</strong>
+                      <span className="text-slate-400">
+                        من القائمة اضغط على <strong>Products</strong> ثم <strong>New Product</strong>:
+                      </span>
+                      <ul className="list-disc list-inside mt-1.5 space-y-0.5 text-slate-300">
+                        <li>اسم المنتج: <strong className="text-white">Smart Money eBook by QEVORIN</strong></li>
+                        <li>السعر: <strong className="text-white">$49.00 USD</strong> (One-time payment)</li>
+                        <li>نوع المنتج: <strong className="text-white">Digital Product / File</strong></li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-[#172B4D] text-[#E9C46A] font-bold flex items-center justify-center shrink-0 text-xs">
+                      3
+                    </div>
+                    <div>
+                      <strong className="text-white block mb-0.5">ضبط رابط التحويل بعد الدفع (Success Redirect URL)</strong>
+                      <span className="text-slate-400">
+                        في إعدادات المنتج داخل Creem، ابحث عن <strong>Redirect URL</strong> أو <strong>Success URL</strong> والصق الرابط المنسوخ أعلاه:
+                        <code className="block mt-1 text-emerald-400 font-mono text-[11px] bg-slate-950 p-1.5 rounded">
+                          {typeof window !== 'undefined' ? `${window.location.origin}/?success=true` : 'https://your-domain.netlify.app/?success=true'}
+                        </code>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-[#172B4D] text-[#E9C46A] font-bold flex items-center justify-center shrink-0 text-xs">
+                      4
+                    </div>
+                    <div>
+                      <strong className="text-white block mb-0.5">نسخ رابط الدفع وتفعيله في موقعك</strong>
+                      <span className="text-slate-400">
+                        انسخ <strong>Checkout Link</strong> من صفحة المنتج في Creem، والصقه في خانة <strong>رابط الدفع من Creem.io</strong> أعلاه، وفعّل زر <strong>Active</strong> ثم اضغط <strong>Save Link</strong>.
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-emerald-950 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-xs">
+                      ✓
+                    </div>
+                    <div>
+                      <strong className="text-white block mb-0.5">تجربة تجربة العميل (End-to-End Test)</strong>
+                      <span className="text-slate-400">
+                        عندما يضغط أي زائر على زر الشراء، سيُنقل لبوابة Creem الآمنة، وبمجرد إتمام الدفع سيعود لموقعك وستظهر له رسالة شكر فورية ويبدأ تنزيل كتاب Smart Money PDF مباشرة على جهازه!
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Simulation Button */}
+                <div className="pt-2 flex items-center justify-between border-t border-slate-700/60 text-xs">
+                  <span className="text-slate-400">
+                    اختبار شاشة تسليم الكتاب كما يراها العميل بعد الدفع:
+                  </span>
+                  <button
+                    onClick={() => {
+                      setIsAdminOpen(false);
+                      window.location.href = `${window.location.origin}/?success=true&payment_success=true`;
+                    }}
+                    className="px-3.5 py-2 text-xs font-semibold text-slate-200 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5 text-[#E9C46A]" />
+                    <span>Test Customer Success Screen</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: CONTENT & COPY */}
           {activeTab === 'content' && (
             <div className="space-y-6">
               {/* Announcement Bar & Hero Texts */}

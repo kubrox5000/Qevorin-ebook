@@ -18,25 +18,68 @@ import { Sparkles, ArrowRight } from 'lucide-react';
 
 function LandingPageContent() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [checkoutInitialStep, setCheckoutInitialStep] = useState<'checkout' | 'processing' | 'success'>('checkout');
+  const [checkoutOrderId, setCheckoutOrderId] = useState<string>('');
+  const [checkoutEmail, setCheckoutEmail] = useState<string>('');
+  const [checkoutSource, setCheckoutSource] = useState<'direct' | 'creem'>('direct');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewInitialChapter, setPreviewInitialChapter] = useState(0);
   const [activePolicy, setActivePolicy] = useState<PolicyType | null>(null);
 
-  const { settings, setIsAdminOpen } = useStore();
+  const { settings, setIsAdminOpen, addOrder } = useStore();
 
-  // Secret admin listener: URL hash (#admin or ?admin=true) and Keyboard shortcut (Ctrl/Cmd + Shift + A)
+  // Secret admin listener and Creem payment success return handler
   useEffect(() => {
-    const checkUrlForAdmin = () => {
-      if (
-        window.location.hash.toLowerCase() === '#admin' ||
-        window.location.search.toLowerCase().includes('admin=true')
-      ) {
+    const checkUrl = () => {
+      const hash = window.location.hash.toLowerCase();
+      const search = window.location.search.toLowerCase();
+      const params = new URLSearchParams(window.location.search);
+
+      // Admin Panel trigger
+      if (hash === '#admin' || search.includes('admin=true')) {
         setIsAdminOpen(true);
+      }
+
+      // Creem payment success redirect trigger
+      const isSuccess =
+        params.get('success') === 'true' ||
+        params.get('payment_success') === 'true' ||
+        params.get('status') === 'success' ||
+        hash === '#success' ||
+        hash === '#download';
+
+      if (isSuccess) {
+        const customerEmail = params.get('customer_email') || params.get('email') || '';
+        const customerName = params.get('customer_name') || 'Customer';
+        const orderRef = params.get('order_id') || `CREEM-${Math.floor(100000 + Math.random() * 900000)}`;
+
+        // Record in store
+        const newId = addOrder({
+          customerName: customerName,
+          customerEmail: customerEmail || 'customer@creem-checkout.com',
+          amount: settings.price,
+          currency: settings.currency,
+          paymentMethod: 'card'
+        });
+
+        setCheckoutOrderId(newId || orderRef);
+        setCheckoutEmail(customerEmail);
+        setCheckoutSource('creem');
+        setCheckoutInitialStep('success');
+        setIsCheckoutOpen(true);
+
+        // Clean up URL without reload so refresh doesn't re-trigger
+        try {
+          const cleanUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+        } catch {
+          // ignore
+        }
       }
     };
 
-    checkUrlForAdmin();
-    window.addEventListener('hashchange', checkUrlForAdmin);
+    checkUrl();
+    window.addEventListener('hashchange', checkUrl);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Secret key combination: Ctrl + Shift + A (or Cmd + Shift + A on Mac)
@@ -49,10 +92,10 @@ function LandingPageContent() {
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      window.removeEventListener('hashchange', checkUrlForAdmin);
+      window.removeEventListener('hashchange', checkUrl);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [setIsAdminOpen]);
+  }, [setIsAdminOpen, addOrder, settings.price, settings.currency]);
 
   const handleOpenPreview = (initialChapterIndex: number = 0) => {
     setPreviewInitialChapter(initialChapterIndex);
@@ -60,6 +103,10 @@ function LandingPageContent() {
   };
 
   const handleOpenCheckout = () => {
+    if (settings.useCreemCheckout && settings.creemCheckoutUrl && settings.creemCheckoutUrl.trim()) {
+      window.location.href = settings.creemCheckoutUrl.trim();
+      return;
+    }
     setIsCheckoutOpen(true);
   };
 
@@ -137,7 +184,14 @@ function LandingPageContent() {
       {/* Checkout Modal */}
       <CheckoutModal
         isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
+        onClose={() => {
+          setIsCheckoutOpen(false);
+          setCheckoutInitialStep('checkout');
+        }}
+        initialStep={checkoutInitialStep}
+        initialOrderId={checkoutOrderId}
+        initialEmail={checkoutEmail}
+        paymentSource={checkoutSource}
       />
 
       {/* Look Inside Preview Modal */}

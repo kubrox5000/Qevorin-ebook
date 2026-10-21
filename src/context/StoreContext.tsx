@@ -22,6 +22,8 @@ export interface SiteSettings extends ProductConfig {
   discountOriginalPrice: number;
   themePrimaryColor: string;
   themeAccentColor: string;
+  creemCheckoutUrl: string;
+  useCreemCheckout: boolean;
 }
 
 export interface StoreContextType {
@@ -56,7 +58,9 @@ const INITIAL_SETTINGS: SiteSettings = {
   enableDiscounts: true,
   discountOriginalPrice: 79,
   themePrimaryColor: "#172B4D",
-  themeAccentColor: "#2A9D8F"
+  themeAccentColor: "#2A9D8F",
+  creemCheckoutUrl: "",
+  useCreemCheckout: false
 };
 
 const INITIAL_ORDERS: Order[] = [
