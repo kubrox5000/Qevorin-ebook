@@ -87,7 +87,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({ isOpen, onClos
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="service@qevorin.com"
+                placeholder="support@qevorin.online"
                 className="w-full pl-9 pr-3.5 py-2.5 text-xs bg-slate-950 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-[#2A9D8F]"
               />
               <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />

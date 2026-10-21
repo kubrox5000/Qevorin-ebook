@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, BookOpen, CheckCircle2, FileSpreadsheet, PiggyBank, Sparkles } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
+import coverPath from '../assets/images/smart_money_ebook_cover_1792524558772.jpg';
 
 interface HeroProps {
   onOpenCheckout: () => void;
@@ -9,7 +10,6 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onOpenCheckout, onOpenPreview }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const coverPath = "/src/assets/images/smart_money_ebook_cover_1792524558772.jpg";
   const { settings } = useStore();
 
   return (
@@ -128,6 +128,10 @@ export const Hero: React.FC<HeroProps> = ({ onOpenCheckout, onOpenPreview }) => 
                   alt="Smart Money eBook 3D Cover Mockup by QEVORIN"
                   referrerPolicy="no-referrer"
                   onLoad={() => setImageLoaded(true)}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/assets/images/smart_money_ebook_cover_1792524558772.jpg';
+                    setImageLoaded(true);
+                  }}
                   className={`w-full h-auto aspect-[3/4] object-cover rounded-xl shadow-inner ${imageLoaded ? 'block' : 'hidden'}`}
                 />
 

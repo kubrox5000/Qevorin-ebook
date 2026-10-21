@@ -3,6 +3,9 @@ import { BookOpen, FileSpreadsheet, Eye, Check, ChevronRight } from 'lucide-reac
 import { Chapter } from '../config/product';
 import { useStore } from '../context/StoreContext';
 
+import worksheetsImg from '../assets/images/smart_money_worksheets_preview_1792524559257.jpg';
+import bundleImg from '../assets/images/smart_money_bundle_spread_1792524560278.jpg';
+
 interface WhatsInsideProps {
   onOpenPreview: (initialChapterIndex?: number) => void;
 }
@@ -23,9 +26,6 @@ export const WhatsInside: React.FC<WhatsInsideProps> = ({ onOpenPreview }) => {
     if (activeTab === 'worksheets') return ch.isWorksheet;
     return true;
   });
-
-  const worksheetsImg = "/src/assets/images/smart_money_worksheets_preview_1792524559257.jpg";
-  const bundleImg = "/src/assets/images/smart_money_bundle_spread_1792524560278.jpg";
 
   return (
     <section id="whats-inside" className="py-16 lg:py-24 bg-slate-50 border-b border-slate-200">
@@ -148,6 +148,9 @@ export const WhatsInside: React.FC<WhatsInsideProps> = ({ onOpenPreview }) => {
                   src={worksheetsImg}
                   alt="Smart Money Printable Financial Worksheets and Planners"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/assets/images/smart_money_worksheets_preview_1792524559257.jpg';
+                  }}
                   className="w-full h-auto aspect-[4/3] object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent flex items-end p-5">
@@ -196,6 +199,9 @@ export const WhatsInside: React.FC<WhatsInsideProps> = ({ onOpenPreview }) => {
                 src={bundleImg}
                 alt="Multi-device eBook display"
                 referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/assets/images/smart_money_bundle_spread_1792524560278.jpg';
+                }}
                 className="w-20 h-16 object-cover rounded-lg shrink-0 border border-slate-200 shadow-2xs"
               />
               <div className="text-xs space-y-1">

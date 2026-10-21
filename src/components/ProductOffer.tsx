@@ -1,6 +1,7 @@
 import React from 'react';
 import { Check, ShieldCheck, Mail, ArrowRight, Download, Laptop, FileText } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
+import coverPath from '../assets/images/smart_money_ebook_cover_1792524558772.jpg';
 
 interface ProductOfferProps {
   onOpenCheckout: () => void;
@@ -8,7 +9,6 @@ interface ProductOfferProps {
 }
 
 export const ProductOffer: React.FC<ProductOfferProps> = ({ onOpenCheckout, onOpenPreview }) => {
-  const coverPath = "/src/assets/images/smart_money_ebook_cover_1792524558772.jpg";
   const { settings } = useStore();
 
   const includedItems = [
@@ -62,6 +62,9 @@ export const ProductOffer: React.FC<ProductOfferProps> = ({ onOpenCheckout, onOp
                     src={coverPath}
                     alt="Smart Money eBook Cover Mockup"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/assets/images/smart_money_ebook_cover_1792524558772.jpg';
+                    }}
                     className="w-44 h-auto aspect-[3/4] object-cover rounded-lg shadow-lg border border-white/10"
                   />
                 </div>

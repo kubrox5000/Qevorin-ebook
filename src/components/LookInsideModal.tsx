@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, ChevronLeft, ChevronRight, BookOpen, Check, Download } from 'lucide-react';
 import { CHAPTERS, PRODUCT_CONFIG } from '../config/product';
+import coverPath from '../assets/images/smart_money_ebook_cover_1792524558772.jpg';
+import worksheetsPath from '../assets/images/smart_money_worksheets_preview_1792524559257.jpg';
 
 interface LookInsideModalProps {
   isOpen: boolean;
@@ -20,8 +22,6 @@ export const LookInsideModal: React.FC<LookInsideModalProps> = ({
   if (!isOpen) return null;
 
   const currentChapter = CHAPTERS[currentIndex];
-  const coverPath = "/src/assets/images/smart_money_ebook_cover_1792524558772.jpg";
-  const worksheetsPath = "/src/assets/images/smart_money_worksheets_preview_1792524559257.jpg";
 
   const excerpts: Record<number, { subtitle: string; body: string[] }> = {
     1: {
@@ -144,6 +144,9 @@ export const LookInsideModal: React.FC<LookInsideModalProps> = ({
                     src={worksheetsPath}
                     alt="Sample worksheet preview"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/assets/images/smart_money_worksheets_preview_1792524559257.jpg';
+                    }}
                     className="w-full h-auto aspect-[16/9] object-cover"
                   />
                 </div>

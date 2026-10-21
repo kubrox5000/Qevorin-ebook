@@ -876,7 +876,7 @@ export const AdminDashboard: React.FC = () => {
                       </span>
                       <ul className="list-disc list-inside mt-1.5 space-y-0.5 text-slate-300">
                         <li>اسم المنتج: <strong className="text-white">Smart Money eBook by QEVORIN</strong></li>
-                        <li>السعر: <strong className="text-white">$49.00 USD</strong> (One-time payment)</li>
+                        <li>السعر: <strong className="text-white">$39.00 USD</strong> (One-time payment)</li>
                         <li>نوع المنتج: <strong className="text-white">Digital Product / File</strong></li>
                       </ul>
                     </div>
@@ -1208,7 +1208,7 @@ export const AdminDashboard: React.FC = () => {
                   Reset Store to Initial Defaults
                 </h3>
                 <p className="text-xs text-slate-400">
-                  This will restore the original pricing ($49), chapters, and initial FAQs from factory settings.
+                  This will restore the original pricing ($39), chapters, and initial FAQs from factory settings.
                 </p>
                 <button
                   onClick={() => {

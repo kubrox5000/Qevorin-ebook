@@ -51,7 +51,7 @@ export function downloadSmartMoneyEBook(customerName: string, customerEmail: str
     <body>
       <div class="header">
         <div class="brand">QEVORIN</div>
-        <div class="licensed">Authorized Digital Copy · Licensed to: ${customerName || 'Customer'} (${customerEmail || 'service@qevorin.com'})</div>
+        <div class="licensed">Authorized Digital Copy · Licensed to: ${customerName || 'Customer'} (${customerEmail || 'support@qevorin.online'})</div>
       </div>
 
       <h1>SMART MONEY</h1>
@@ -60,7 +60,7 @@ export function downloadSmartMoneyEBook(customerName: string, customerEmail: str
       <div class="meta-box">
         <strong>Product:</strong> Smart Money Official Digital Edition & Worksheets<br>
         <strong>Brand:</strong> QEVORIN · Plan Smarter. Save Better. Live With Confidence.<br>
-        <strong>Support Email:</strong> service@qevorin.com
+        <strong>Support Email:</strong> support@qevorin.online
       </div>
 
       <div class="chapter">
@@ -116,7 +116,7 @@ export function downloadSmartMoneyEBook(customerName: string, customerEmail: str
       </div>
 
       <div class="footer">
-        &copy; ${new Date().getFullYear()} QEVORIN. All rights reserved. For customer support, contact service@qevorin.com.
+        &copy; ${new Date().getFullYear()} QEVORIN. All rights reserved. For customer support, contact support@qevorin.online.
       </div>
     </body>
     </html>
@@ -179,7 +179,7 @@ export function downloadWorksheetsPack() {
           </tbody>
         </table>
       </div>
-      <p style="font-size: 11px; color: #64748b; text-align: center;">Official QEVORIN Material · service@qevorin.com</p>
+      <p style="font-size: 11px; color: #64748b; text-align: center;">Official QEVORIN Material · support@qevorin.online</p>
     </body>
     </html>
   `;

@@ -20,9 +20,9 @@ export const PRODUCT_CONFIG: ProductConfig = {
   subtitle: "A Simple Guide to Budgeting, Saving, and Feeling More in Control",
   brand: "QEVORIN",
   slogan: "Plan Smarter. Save Better. Live With Confidence.",
-  supportEmail: "service@qevorin.com",
+  supportEmail: "support@qevorin.online",
   format: "PDF Digital Download",
-  price: 49, // Change in one place to update everywhere
+  price: 39, // Change in one place to update everywhere
   currency: "USD",
   currencySymbol: "$",
   pagesEstimate: "12-page practical workbook & printable sheets",
@@ -128,6 +128,6 @@ export const FAQS = [
   },
   {
     question: "How can I contact customer support?",
-    answer: "Our customer support team is always ready to assist you. You can reach us anytime directly via email at service@qevorin.com. We typically respond within 24 business hours."
+    answer: "Our customer support team is always ready to assist you. You can reach us anytime directly via email at support@qevorin.online. We typically respond within 24 business hours."
   }
 ];

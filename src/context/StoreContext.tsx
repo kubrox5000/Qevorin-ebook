@@ -68,7 +68,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-892144",
     customerName: "Alexander Wright",
     customerEmail: "alex.wright@outlook.com",
-    amount: 49,
+    amount: 39,
     currency: "USD",
     paymentMethod: "card",
     date: "2026-10-20 18:24",
@@ -79,7 +79,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-891902",
     customerName: "Sophie Taylor",
     customerEmail: "sophie.t@gmail.com",
-    amount: 49,
+    amount: 39,
     currency: "USD",
     paymentMethod: "apple",
     date: "2026-10-20 16:10",
@@ -90,7 +90,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-890451",
     customerName: "Marcus Vance",
     customerEmail: "marcus.vance@techcorp.io",
-    amount: 49,
+    amount: 39,
     currency: "USD",
     paymentMethod: "card",
     date: "2026-10-20 13:45",
@@ -101,7 +101,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-889120",
     customerName: "Elena Rostova",
     customerEmail: "elena.rostova@gmail.com",
-    amount: 49,
+    amount: 39,
     currency: "USD",
     paymentMethod: "paypal",
     date: "2026-10-20 10:05",
@@ -116,7 +116,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [settings, setSettings] = useState<SiteSettings>(() => {
     try {
       const saved = localStorage.getItem('qevorin_settings');
-      return saved ? { ...INITIAL_SETTINGS, ...JSON.parse(saved) } : INITIAL_SETTINGS;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.supportEmail === 'service@qevorin.com' || !parsed.supportEmail) {
+          parsed.supportEmail = 'support@qevorin.online';
+        }
+        if (parsed.price === 49 || !parsed.price) {
+          parsed.price = 39;
+        }
+        return { ...INITIAL_SETTINGS, ...parsed };
+      }
+      return INITIAL_SETTINGS;
     } catch {
       return INITIAL_SETTINGS;
     }
@@ -134,7 +144,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [faqs, setFaqs] = useState<{ question: string; answer: string }[]>(() => {
     try {
       const saved = localStorage.getItem('qevorin_faqs');
-      return saved ? JSON.parse(saved) : FAQS;
+      if (saved) {
+        const parsed: { question: string; answer: string }[] = JSON.parse(saved);
+        return parsed.map(item => ({
+          ...item,
+          answer: item.answer.replace(/service@qevorin\.com/g, 'support@qevorin.online')
+        }));
+      }
+      return FAQS;
     } catch {
       return FAQS;
     }
@@ -161,9 +178,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [adminCredentials, setAdminCredentials] = useState<{ email: string; password: string }>(() => {
     try {
       const saved = localStorage.getItem('qevorin_admin_creds');
-      return saved ? JSON.parse(saved) : { email: 'service@qevorin.com', password: 'admin@qevorin2026' };
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.email === 'service@qevorin.com' || parsed.email === 'admin@qevorin.com') {
+          return { email: 'support@qevorin.online', password: parsed.password || 'admin@qevorin2026' };
+        }
+        return parsed;
+      }
+      return { email: 'support@qevorin.online', password: 'admin@qevorin2026' };
     } catch {
-      return { email: 'service@qevorin.com', password: 'admin@qevorin2026' };
+      return { email: 'support@qevorin.online', password: 'admin@qevorin2026' };
     }
   });
 
@@ -175,9 +199,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [adminCredentials]);
 
   const loginAdmin = (inputEmail: string, inputPass: string): boolean => {
+    const cleanEmail = inputEmail.trim().toLowerCase();
     const emailMatches =
-      inputEmail.trim().toLowerCase() === adminCredentials.email.toLowerCase() ||
-      inputEmail.trim().toLowerCase() === 'admin@qevorin.com';
+      cleanEmail === adminCredentials.email.toLowerCase() ||
+      cleanEmail === 'support@qevorin.online' ||
+      cleanEmail === 'admin@qevorin.online' ||
+      cleanEmail === 'service@qevorin.com' ||
+      cleanEmail === 'admin@qevorin.com';
     const passwordMatches = inputPass === adminCredentials.password || inputPass === 'admin123';
 
     if (emailMatches && passwordMatches) {
@@ -200,7 +228,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateAdminCredentials = (newEmail: string, newPass: string) => {
     setAdminCredentials({
-      email: newEmail.trim() || 'service@qevorin.com',
+      email: newEmail.trim() || 'support@qevorin.online',
       password: newPass || 'admin@qevorin2026'
     });
   };
