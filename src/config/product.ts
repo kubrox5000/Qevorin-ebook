@@ -22,7 +22,7 @@ export const PRODUCT_CONFIG: ProductConfig = {
   slogan: "Plan Smarter. Save Better. Live With Confidence.",
   supportEmail: "support@qevorin.online",
   format: "PDF Digital Download",
-  price: 39, // Change in one place to update everywhere
+  price: 149, // Change in one place to update everywhere
   currency: "USD",
   currencySymbol: "$",
   pagesEstimate: "12-page practical workbook & printable sheets",

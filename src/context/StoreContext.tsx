@@ -121,8 +121,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (parsed.supportEmail === 'service@qevorin.com' || !parsed.supportEmail) {
           parsed.supportEmail = 'support@qevorin.online';
         }
-        if (parsed.price === 49 || !parsed.price) {
-          parsed.price = 39;
+        if (parsed.price === 39 || parsed.price === 49 || !parsed.price) {
+          parsed.price = PRODUCT_CONFIG.price;
         }
         return { ...INITIAL_SETTINGS, ...parsed };
       }
