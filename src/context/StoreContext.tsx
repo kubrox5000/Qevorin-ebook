@@ -22,6 +22,9 @@ export interface SiteSettings extends ProductConfig {
   discountOriginalPrice: number;
   themePrimaryColor: string;
   themeAccentColor: string;
+  paymentGateway: 'whop' | 'creem' | 'builtin';
+  whopCheckoutUrl: string;
+  useWhopCheckout: boolean;
   creemCheckoutUrl: string;
   useCreemCheckout: boolean;
 }
@@ -56,9 +59,12 @@ const INITIAL_SETTINGS: SiteSettings = {
   heroHeadline: "Take Control of Your Money, One Simple Step at a Time.",
   heroSubheadline: "Discover a practical, beginner-friendly guide to budgeting, saving, and building healthier money habits—without complicated spreadsheets or overwhelming financial jargon.",
   enableDiscounts: true,
-  discountOriginalPrice: 79,
+  discountOriginalPrice: 249,
   themePrimaryColor: "#172B4D",
   themeAccentColor: "#2A9D8F",
+  paymentGateway: 'whop',
+  whopCheckoutUrl: PRODUCT_CONFIG.whopCheckoutUrl || "",
+  useWhopCheckout: true,
   creemCheckoutUrl: "",
   useCreemCheckout: false
 };
@@ -68,7 +74,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-892144",
     customerName: "Alexander Wright",
     customerEmail: "alex.wright@outlook.com",
-    amount: 39,
+    amount: 149,
     currency: "USD",
     paymentMethod: "card",
     date: "2026-10-20 18:24",
@@ -79,7 +85,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-891902",
     customerName: "Sophie Taylor",
     customerEmail: "sophie.t@gmail.com",
-    amount: 39,
+    amount: 149,
     currency: "USD",
     paymentMethod: "apple",
     date: "2026-10-20 16:10",
@@ -90,7 +96,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-890451",
     customerName: "Marcus Vance",
     customerEmail: "marcus.vance@techcorp.io",
-    amount: 39,
+    amount: 149,
     currency: "USD",
     paymentMethod: "card",
     date: "2026-10-20 13:45",
@@ -101,7 +107,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-889120",
     customerName: "Elena Rostova",
     customerEmail: "elena.rostova@gmail.com",
-    amount: 39,
+    amount: 149,
     currency: "USD",
     paymentMethod: "paypal",
     date: "2026-10-20 10:05",
@@ -121,8 +127,20 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (parsed.supportEmail === 'service@qevorin.com' || !parsed.supportEmail) {
           parsed.supportEmail = 'support@qevorin.online';
         }
-        if (parsed.price === 49 || !parsed.price) {
-          parsed.price = 39;
+        if (parsed.price === 49 || parsed.price === 39 || !parsed.price) {
+          parsed.price = 149;
+        }
+        if (parsed.discountOriginalPrice === 79 || !parsed.discountOriginalPrice) {
+          parsed.discountOriginalPrice = 249;
+        }
+        if (!parsed.paymentGateway) {
+          parsed.paymentGateway = 'whop';
+        }
+        if (parsed.whopCheckoutUrl === undefined) {
+          parsed.whopCheckoutUrl = PRODUCT_CONFIG.whopCheckoutUrl || '';
+        }
+        if (parsed.useWhopCheckout === undefined) {
+          parsed.useWhopCheckout = true;
         }
         return { ...INITIAL_SETTINGS, ...parsed };
       }

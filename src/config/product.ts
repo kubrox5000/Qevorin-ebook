@@ -13,6 +13,8 @@ export interface ProductConfig {
   ebookFilename: string;
   includesWorksheets: boolean;
   targetMarkets: string[];
+  whopCheckoutUrl?: string;
+  paymentGateway?: 'whop' | 'creem' | 'builtin';
 }
 
 export const PRODUCT_CONFIG: ProductConfig = {
@@ -22,13 +24,15 @@ export const PRODUCT_CONFIG: ProductConfig = {
   slogan: "Plan Smarter. Save Better. Live With Confidence.",
   supportEmail: "support@qevorin.online",
   format: "PDF Digital Download",
-  price: 39, // Change in one place to update everywhere
+  price: 149, // Change in one place to update everywhere
   currency: "USD",
   currencySymbol: "$",
   pagesEstimate: "12-page practical workbook & printable sheets",
   ebookPdfPath: "/assets/aistudio/Qevorin_Smart_Money_Ebook_b0515eee.pdf",
   ebookFilename: "Qevorin_Smart_Money_Ebook_2026.pdf",
   includesWorksheets: true,
+  whopCheckoutUrl: ((typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_WHOP_CHECKOUT_URL) as string) || "",
+  paymentGateway: 'whop',
   targetMarkets: [
     "United States",
     "United Kingdom",

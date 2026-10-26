@@ -9,7 +9,7 @@ interface CheckoutModalProps {
   initialStep?: 'checkout' | 'processing' | 'success';
   initialOrderId?: string;
   initialEmail?: string;
-  paymentSource?: 'direct' | 'creem';
+  paymentSource?: 'direct' | 'creem' | 'whop';
 }
 
 export const CheckoutModal: React.FC<CheckoutModalProps> = ({
@@ -153,7 +153,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
-              {paymentSource === 'creem' || orderId.startsWith('CREEM-') ? (
+              {paymentSource === 'whop' || orderId.startsWith('WHOP-') ? (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 text-orange-800 text-xs font-semibold border border-orange-200">
+                  <span className="w-2 h-2 rounded-full bg-[#FF5A00]" />
+                  <span>Verified Payment via Whop.com</span>
+                </div>
+              ) : paymentSource === 'creem' || orderId.startsWith('CREEM-') ? (
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
                   <span>Verified Payment via Creem.io</span>
                 </div>
@@ -277,11 +282,39 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               </div>
             </div>
 
-            {errorMsg && (
-              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700">
-                {errorMsg}
-              </div>
+            {/* Whop Express Checkout Option if URL exists */}
+            {settings.whopCheckoutUrl && settings.whopCheckoutUrl.trim() && (
+              <a
+                href={settings.whopCheckoutUrl.trim()}
+                className="w-full py-3 px-4 rounded-xl font-bold text-white bg-[#FF5A00] hover:bg-[#E04F00] transition-all duration-200 flex items-center justify-between shadow-sm hover:shadow cursor-pointer"
+              >
+                <div className="flex items-center gap-2 text-xs sm:text-sm">
+                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  <span>Express Checkout via Whop</span>
+                </div>
+                <span className="text-xs bg-black/20 px-2 py-0.5 rounded font-medium flex items-center gap-1">
+                  <span>Apple Pay · Card · Crypto</span>
+                  <span>→</span>
+                </span>
+              </a>
             )}
+
+            {/* If Whop is primary gateway but URL is not configured yet */}
+            {(settings.paymentGateway === 'whop' || settings.useWhopCheckout) &&
+              (!settings.whopCheckoutUrl || !settings.whopCheckoutUrl.trim()) && (
+                <div className="p-3 rounded-xl bg-orange-50 border border-orange-200 text-xs text-orange-900 flex items-start gap-2">
+                  <span className="text-orange-500 font-bold shrink-0">ℹ</span>
+                  <div className="space-y-1">
+                    <div>
+                      <strong>بوابة الدفع Whop مفعلة:</strong> يمكنك وضع رابط الدفع الخاص بمنتجك على Whop في{' '}
+                      <span className="font-semibold underline">لوحة التحكم (Admin Panel)</span> أو ملف الإعدادات ليتم تحويل الزوار مباشرة.
+                    </div>
+                    <div className="text-[11px] text-orange-800">
+                      يمكنك أيضاً إتمام تجربة الطلب أدناه مباشرة لاختبار تسليم الملفات.
+                    </div>
+                  </div>
+                </div>
+              )}
 
             {/* Payment Method Selector */}
             <div className="space-y-2">

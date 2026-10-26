@@ -70,6 +70,8 @@ export const AdminDashboard: React.FC = () => {
   const [adminEmailInput, setAdminEmailInput] = useState(adminCredentials.email);
   const [adminPasswordInput, setAdminPasswordInput] = useState('');
   const [copiedSuccessUrl, setCopiedSuccessUrl] = useState(false);
+  const [copiedWhopSuccessUrl, setCopiedWhopSuccessUrl] = useState(false);
+  const [activeGatewaySubtab, setActiveGatewaySubtab] = useState<'whop' | 'creem'>('whop');
 
   if (!isAdminOpen) return null;
 
@@ -260,10 +262,14 @@ export const AdminDashboard: React.FC = () => {
             }`}
           >
             <CreditCard className="w-4 h-4" />
-            <span>Payment & Creem.io</span>
-            {settings.useCreemCheckout && settings.creemCheckoutUrl ? (
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-            ) : null}
+            <span>Gateways (Whop & Creem)</span>
+            {settings.useWhopCheckout && settings.whopCheckoutUrl ? (
+              <span className="w-2 h-2 rounded-full bg-[#FF5A00]" title="Whop active" />
+            ) : settings.useCreemCheckout && settings.creemCheckoutUrl ? (
+              <span className="w-2 h-2 rounded-full bg-emerald-400" title="Creem active" />
+            ) : (
+              <span className="w-2 h-2 rounded-full bg-slate-600" />
+            )}
           </button>
 
           <button
@@ -697,248 +703,503 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 4: PAYMENT & CREEM.IO GATEWAY */}
+          {/* TAB 4: PAYMENT GATEWAYS (WHOP & CREEM) */}
           {activeTab === 'payment' && (
             <div className="max-w-3xl space-y-6">
-              {/* Status & Toggle Card */}
-              <div className="p-6 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/60 pb-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <CreditCard className="w-5 h-5 text-[#2A9D8F]" />
-                      <h3 className="text-base font-bold text-white font-display">
-                        Creem.io Payment Gateway / بوابة دفع Creem
-                      </h3>
-                    </div>
+              {/* Primary Gateway Selector */}
+              <div className="p-5 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <CreditCard className="w-4 h-4 text-[#2A9D8F]" />
+                      <span>اختيار بوابة الدفع الأساسية / Primary Payment Gateway</span>
+                    </h3>
                     <p className="text-xs text-slate-400">
-                      Enable real global payments via Card, Apple Pay, Google Pay & local methods through Creem.
+                      حدد بوابة الدفع التي ترغب في توجيه العملاء إليها عند الضغط على زر الشراء في الموقع.
                     </p>
                   </div>
-
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-medium text-slate-300">
-                      Creem Mode:
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const nextState = !settings.useCreemCheckout;
-                        updateSettings({ useCreemCheckout: nextState });
-                        showToast(nextState ? 'Creem checkout enabled!' : 'Creem checkout disabled (built-in modal active).');
-                      }}
-                      className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors cursor-pointer ${
-                        settings.useCreemCheckout ? 'bg-[#2A9D8F]' : 'bg-slate-700'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          settings.useCreemCheckout ? 'translate-x-7' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                    <span
-                      className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${
-                        settings.useCreemCheckout
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                          : 'bg-slate-700 text-slate-400'
-                      }`}
-                    >
-                      {settings.useCreemCheckout ? 'Active' : 'Disabled'}
-                    </span>
-                  </div>
                 </div>
 
-                {/* Status Notice */}
-                {settings.useCreemCheckout ? (
-                  <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-800/40 text-xs text-emerald-300 flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <div className="leading-relaxed">
-                      <strong className="text-white">Creem Checkout is Active:</strong> When customers click any "Get Smart Money" or "Buy Now" CTA on the landing page, they will be redirected to your official Creem checkout page for secure payment.
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  {/* Whop Card */}
+                  <div
+                    onClick={() => {
+                      updateSettings({ paymentGateway: 'whop', useWhopCheckout: true, useCreemCheckout: false });
+                      setActiveGatewaySubtab('whop');
+                      showToast('تم تعيين Whop.com كبوابة الدفع الأساسية للموقع');
+                    }}
+                    className={`p-4 rounded-xl border-2 transition-all cursor-pointer relative flex flex-col justify-between ${
+                      settings.paymentGateway === 'whop' || (settings.useWhopCheckout && !settings.useCreemCheckout)
+                        ? 'bg-slate-900 border-[#FF5A00] shadow-md'
+                        : 'bg-slate-900/60 border-slate-700 hover:border-slate-600'
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="w-7 h-7 rounded-lg bg-[#FF5A00] text-white font-bold flex items-center justify-center text-xs shadow-xs">
+                            W
+                          </span>
+                          <span className="text-sm font-bold text-white">Whop.com</span>
+                        </div>
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                          {settings.paymentGateway === 'whop' || (settings.useWhopCheckout && !settings.useCreemCheckout) ? 'مفعل (Active)' : 'موصى به'}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-300 leading-relaxed">
+                        بوابة رائدة للمنتجات الرقمية: تدعم بطاقات الائتمان، Apple Pay، Google Pay، والعملات المشفرة مع تسليم تلقائي وتوليد الفواتير.
+                      </p>
                     </div>
-                  </div>
-                ) : (
-                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-400 flex items-start gap-2.5">
-                    <Sparkles className="w-4 h-4 text-[#E9C46A] shrink-0 mt-0.5" />
-                    <div className="leading-relaxed">
-                      <strong className="text-slate-300">Built-in Checkout Modal is Active:</strong> Customers currently complete their order and receive instant downloads via the high-converting simulated storefront modal. Enable the switch above once you have created your product on Creem.io.
-                    </div>
-                  </div>
-                )}
 
-                {/* Creem Checkout URL Input */}
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-200 block">
-                    Creem Product Checkout Link / رابط الدفع من Creem.io
-                  </label>
-                  <p className="text-[11px] text-slate-400">
-                    Paste the Checkout Link or Payment Link generated by your Creem.io product dashboard (e.g., <code className="text-slate-300 font-mono">https://checkout.creem.io/...</code> or <code className="text-slate-300 font-mono">https://creem.io/...</code>).
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <input
-                      type="url"
-                      placeholder="https://checkout.creem.io/p/prod_xxxx..."
-                      value={settings.creemCheckoutUrl || ''}
-                      onChange={(e) => updateSettings({ creemCheckoutUrl: e.target.value })}
-                      className="flex-1 px-3.5 py-2.5 text-sm bg-slate-900 border border-slate-700 rounded-xl text-white font-mono focus:outline-none focus:border-[#2A9D8F]"
-                    />
-                    <div className="flex items-center gap-2">
+                    <div className="pt-3 border-t border-slate-800 mt-2 flex items-center justify-between text-[11px]">
+                      <span className="text-slate-400">حالة الربط:</span>
+                      <span className={settings.whopCheckoutUrl ? 'text-emerald-400 font-semibold' : 'text-amber-400'}>
+                        {settings.whopCheckoutUrl ? 'رابط الدفع محفوظ ✓' : 'بحاجة لرابط الدفع'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Creem Card */}
+                  <div
+                    onClick={() => {
+                      updateSettings({ paymentGateway: 'creem', useCreemCheckout: true, useWhopCheckout: false });
+                      setActiveGatewaySubtab('creem');
+                      showToast('تم تعيين Creem.io كبوابة الدفع');
+                    }}
+                    className={`p-4 rounded-xl border-2 transition-all cursor-pointer relative flex flex-col justify-between ${
+                      settings.paymentGateway === 'creem' || settings.useCreemCheckout
+                        ? 'bg-slate-900 border-[#2A9D8F] shadow-md'
+                        : 'bg-slate-900/60 border-slate-700 hover:border-slate-600'
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="w-7 h-7 rounded-lg bg-[#2A9D8F] text-white font-bold flex items-center justify-center text-xs shadow-xs">
+                            C
+                          </span>
+                          <span className="text-sm font-bold text-white">Creem.io</span>
+                        </div>
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">
+                          {settings.paymentGateway === 'creem' || settings.useCreemCheckout ? 'مفعل (Active)' : 'بديل'}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-300 leading-relaxed">
+                        بوابة دفع عالمية لدعم الدفع السريع والبطاقات البنكية للمنتجات الرقمية.
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-800 mt-2 flex items-center justify-between text-[11px]">
+                      <span className="text-slate-400">حالة الربط:</span>
+                      <span className={settings.creemCheckoutUrl ? 'text-emerald-400 font-semibold' : 'text-slate-400'}>
+                        {settings.creemCheckoutUrl ? 'رابط الدفع محفوظ ✓' : 'غير متصل'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Subtab Navigation (Whop vs Creem settings) */}
+              <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveGatewaySubtab('whop')}
+                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
+                    activeGatewaySubtab === 'whop'
+                      ? 'bg-[#FF5A00] text-white'
+                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  <span>إعدادات Whop.com</span>
+                  {settings.whopCheckoutUrl && <Check className="w-3 h-3 text-white" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveGatewaySubtab('creem')}
+                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
+                    activeGatewaySubtab === 'creem'
+                      ? 'bg-[#2A9D8F] text-white'
+                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  <span>إعدادات Creem.io</span>
+                </button>
+              </div>
+
+              {/* WHOP SETTINGS SECTION */}
+              {activeGatewaySubtab === 'whop' && (
+                <div className="space-y-6">
+                  {/* Status & Toggle Card */}
+                  <div className="p-6 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/60 pb-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-md bg-[#FF5A00] text-white text-xs font-extrabold flex items-center justify-center">
+                            W
+                          </span>
+                          <h3 className="text-base font-bold text-white font-display">
+                            Whop.com Payment Gateway / بوابة دفع Whop
+                          </h3>
+                        </div>
+                        <p className="text-xs text-slate-400">
+                          تحويل العملاء إلى صفحة الدفع الموثوقة لمنتجك على Whop واستلام الأرباح مباشرة عبر حسابك البنكي أو Stripe.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-medium text-slate-300">
+                          حالة البوابة:
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const nextState = !settings.useWhopCheckout;
+                            updateSettings({
+                              useWhopCheckout: nextState,
+                              paymentGateway: nextState ? 'whop' : 'builtin'
+                            });
+                            showToast(nextState ? 'Whop checkout enabled!' : 'Whop checkout disabled.');
+                          }}
+                          className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors cursor-pointer ${
+                            settings.useWhopCheckout ? 'bg-[#FF5A00]' : 'bg-slate-700'
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              settings.useWhopCheckout ? 'translate-x-7' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                        <span
+                          className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${
+                            settings.useWhopCheckout
+                              ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                              : 'bg-slate-700 text-slate-400'
+                          }`}
+                        >
+                          {settings.useWhopCheckout ? 'مفعل (Active)' : 'معطل'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Status Notice */}
+                    {settings.useWhopCheckout && settings.whopCheckoutUrl ? (
+                      <div className="p-3.5 rounded-xl bg-orange-950/30 border border-orange-800/40 text-xs text-orange-300 flex items-start gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
+                        <div className="leading-relaxed">
+                          <strong className="text-white">بوابة Whop جاهزة ومفعلة:</strong> عند ضغط أي عميل على زر الشراء أو "GET THE EBOOK NOW"، سيتم توجيهه مباشرة لرابط الدفع الخاص بك على Whop.
+                        </div>
+                      </div>
+                    ) : settings.useWhopCheckout ? (
+                      <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-800/40 text-xs text-amber-300 flex items-start gap-2.5">
+                        <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                        <div className="leading-relaxed">
+                          <strong className="text-white">خطوة واحدة متبقية:</strong> يرجى لصق رابط الدفع (Checkout Link) الخاص بمنتجك على Whop في الحقل أدناه والضغط على "حفظ الرابط".
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-400 flex items-start gap-2.5">
+                        <Sparkles className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                        <div className="leading-relaxed">
+                          بوابة Whop معطلة حالياً. اضغط على زر التفعيل بالأعلى لتنشيطها.
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Whop Checkout URL Input */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-200 block">
+                        رابط الدفع لمنتجك على Whop (Whop Checkout Link / URL)
+                      </label>
+                      <p className="text-[11px] text-slate-400">
+                        الصق هنا رابط الدفع المباشر الذي يوفره لك Whop (مثال: <code className="text-orange-300 font-mono">https://whop.com/checkout/plan_xxx...</code> أو <code className="text-orange-300 font-mono">https://whop.com/your-store/...</code>).
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <input
+                          type="url"
+                          placeholder="https://whop.com/checkout/plan_xxxx..."
+                          value={settings.whopCheckoutUrl || ''}
+                          onChange={(e) => updateSettings({ whopCheckoutUrl: e.target.value })}
+                          className="flex-1 px-3.5 py-2.5 text-sm bg-slate-900 border border-slate-700 rounded-xl text-white font-mono focus:outline-none focus:border-[#FF5A00]"
+                        />
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              showToast('تم حفظ رابط Whop بنجاح!');
+                            }}
+                            className="px-4 py-2.5 text-xs font-bold text-white bg-[#FF5A00] hover:bg-[#E04F00] rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
+                          >
+                            <Check className="w-4 h-4" />
+                            <span>حفظ الرابط</span>
+                          </button>
+
+                          {settings.whopCheckoutUrl && (
+                            <a
+                              href={settings.whopCheckoutUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3.5 py-2.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                              <span>تجربة الرابط</span>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Return / Success URL for Whop Dashboard */}
+                    <div className="p-4 rounded-xl bg-slate-900 border border-slate-700/80 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5 text-[#E9C46A]" />
+                          <span>رابط العودة بعد الدفع للعميل (Whop Redirect / Thank-You URL):</span>
+                        </label>
+                        <button
+                          onClick={() => {
+                            const url = `${window.location.origin}/?success=true&source=whop`;
+                            navigator.clipboard.writeText(url);
+                            setCopiedWhopSuccessUrl(true);
+                            showToast('تم نسخ رابط العودة بعد الدفع!');
+                            setTimeout(() => setCopiedWhopSuccessUrl(false), 2500);
+                          }}
+                          className="text-xs text-[#2A9D8F] hover:text-[#218376] font-semibold flex items-center gap-1 cursor-pointer"
+                        >
+                          {copiedWhopSuccessUrl ? (
+                            <>
+                              <Check className="w-3.5 h-3.5" />
+                              <span>تم النسخ!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>نسخ الرابط</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 font-mono text-xs text-orange-400 break-all select-all">
+                        {typeof window !== 'undefined' ? `${window.location.origin}/?success=true&source=whop` : 'https://your-domain.netlify.app/?success=true&source=whop'}
+                      </div>
+                      <p className="text-[11px] text-slate-400 leading-relaxed">
+                        ضع هذا الرابط في خانة <strong>Redirect after purchase</strong> أو <strong>Thank-You URL</strong> في صفحة إعدادات المنتج داخل Whop. بمجرد أن يكمل العميل الدفع في Whop، سيعود فوراً لموقعك ويبدأ تحميل كتاب Smart Money PDF وتظهر له شاشة التأكيد!
+                      </p>
+                    </div>
+
+                    {/* Netlify Permanent Configuration Tip */}
+                    <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-300 space-y-1.5">
+                      <div className="flex items-center gap-1.5 font-bold text-sky-400">
+                        <span>💡 حفظ الرابط بشكل دائم على Netlify:</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 leading-relaxed">
+                        إذا أردت تثبيت رابط Whop على Netlify بشكل دائم، ادخل إلى إعدادات موقعك في Netlify: <br />
+                        <span className="text-white">Site configuration &gt; Environment variables</span> ثم أضف المتغير:
+                        <code className="block mt-1 bg-slate-950 p-1 rounded font-mono text-emerald-400 text-[11px]">
+                          VITE_WHOP_CHECKOUT_URL = {settings.whopCheckoutUrl || 'https://whop.com/checkout/your-plan'}
+                        </code>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Step-by-Step Whop Guide */}
+                  <div className="p-6 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-4">
+                    <h4 className="text-sm font-bold text-white flex items-center gap-2 font-display">
+                      <span className="w-6 h-6 rounded bg-[#FF5A00] text-white flex items-center justify-center text-xs font-bold">W</span>
+                      <span>دليل ربط Whop.com خطوة بخطوة / Step-by-Step Whop Guide</span>
+                    </h4>
+
+                    <div className="space-y-3 text-xs">
+                      <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-[#FF5A00] text-white font-bold flex items-center justify-center shrink-0 text-xs">
+                          1
+                        </div>
+                        <div>
+                          <strong className="text-white block mb-0.5">التسجيل في منصة Whop.com</strong>
+                          <span className="text-slate-400">
+                            توجه إلى <a href="https://whop.com" target="_blank" rel="noopener noreferrer" className="text-[#FF5A00] underline font-semibold">whop.com</a> وسجل حسابك، وقم بإنشاء شركتك/متجرك (Company / Store)، ثم اربط بيانات استلام الأموال (Bank Account عبر Stripe Connect).
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-[#FF5A00] text-white font-bold flex items-center justify-center shrink-0 text-xs">
+                          2
+                        </div>
+                        <div>
+                          <strong className="text-white block mb-0.5">إنشاء المنتج (Create Product & Pricing Plan)</strong>
+                          <span className="text-slate-400">
+                            من القائمة الجانبية في Whop، اضغط على <strong>Products</strong> ثم <strong>Create Product</strong>:
+                          </span>
+                          <ul className="list-disc list-inside mt-1.5 space-y-0.5 text-slate-300">
+                            <li>اسم المنتج: <strong className="text-white">Smart Money eBook by QEVORIN</strong></li>
+                            <li>التسعير: اختر <strong className="text-white">One-time payment</strong> وضع السعر <strong className="text-white">$149.00 USD</strong></li>
+                            <li>الوصف: <span className="text-slate-400">A Simple Guide to Budgeting, Saving, and Feeling More in Control</span></li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-[#FF5A00] text-white font-bold flex items-center justify-center shrink-0 text-xs">
+                          3
+                        </div>
+                        <div>
+                          <strong className="text-white block mb-0.5">إضافة الملف الرقمي (Digital Download)</strong>
+                          <span className="text-slate-400">
+                            في تبويب <strong>Files / Content</strong> داخل المنتج، ارفع ملف الكتاب الرسمي <strong className="text-white">Qevorin_Smart_Money_Ebook_2026.pdf</strong> حتى يتمكن العميل من تحميله دائماً من حسابه في Whop.
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-[#FF5A00] text-white font-bold flex items-center justify-center shrink-0 text-xs">
+                          4
+                        </div>
+                        <div>
+                          <strong className="text-white block mb-0.5">ضبط رابط العودة بعد الشراء (Redirect URL)</strong>
+                          <span className="text-slate-400">
+                            في إعدادات الخروج (Checkout Settings / Links) داخل Whop، فعل خيار <strong>Redirect after purchase</strong> وضع رابط موقعك المنسوخ أعلاه:
+                            <code className="block mt-1 text-orange-400 font-mono text-[11px] bg-slate-950 p-1.5 rounded">
+                              {typeof window !== 'undefined' ? `${window.location.origin}/?success=true&source=whop` : 'https://your-domain.netlify.app/?success=true&source=whop'}
+                            </code>
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-[#FF5A00] text-white font-bold flex items-center justify-center shrink-0 text-xs">
+                          5
+                        </div>
+                        <div>
+                          <strong className="text-white block mb-0.5">نسخ رابط الدفع ولصقه في موقعك</strong>
+                          <span className="text-slate-400">
+                            انسخ رابط <strong>Checkout Link</strong> أو <strong>Direct Link</strong> من Whop، ثم الصقه في خانة <strong>رابط الدفع لمنتجك على Whop</strong> بالأعلى، واضغط <strong>حفظ الرابط</strong>.
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Simulation Button */}
+                    <div className="pt-2 flex items-center justify-between border-t border-slate-700/60 text-xs">
+                      <span className="text-slate-400">
+                        اختبار تجربة العميل وشاشة تسليم كتاب PDF بعد الدفع عبر Whop:
+                      </span>
                       <button
                         onClick={() => {
-                          showToast('Creem settings saved successfully!');
+                          setIsAdminOpen(false);
+                          window.location.href = `${window.location.origin}/?success=true&source=whop`;
                         }}
-                        className="px-4 py-2.5 text-xs font-bold text-white bg-[#2A9D8F] hover:bg-[#218376] rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
+                        className="px-3.5 py-2 text-xs font-semibold text-white bg-[#FF5A00] hover:bg-[#E04F00] rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                       >
-                        <Check className="w-4 h-4" />
-                        <span>Save Link</span>
+                        <Download className="w-3.5 h-3.5" />
+                        <span>اختبار شاشة تسليم الكتاب (Whop Success Screen)</span>
                       </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-                      {settings.creemCheckoutUrl && (
-                        <a
-                          href={settings.creemCheckoutUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3.5 py-2.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
+              {/* CREEM SETTINGS SECTION */}
+              {activeGatewaySubtab === 'creem' && (
+                <div className="space-y-6">
+                  <div className="p-6 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-700/60 pb-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="w-5 h-5 text-[#2A9D8F]" />
+                          <h3 className="text-base font-bold text-white font-display">
+                            Creem.io Payment Gateway
+                          </h3>
+                        </div>
+                        <p className="text-xs text-slate-400">
+                          بوابة دفع بديلة تدعم الدفع بالبطاقات البنكية و Apple Pay.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-medium text-slate-300">
+                          حالة Creem:
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const nextState = !settings.useCreemCheckout;
+                            updateSettings({
+                              useCreemCheckout: nextState,
+                              paymentGateway: nextState ? 'creem' : 'builtin'
+                            });
+                            showToast(nextState ? 'Creem checkout enabled!' : 'Creem checkout disabled.');
+                          }}
+                          className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors cursor-pointer ${
+                            settings.useCreemCheckout ? 'bg-[#2A9D8F]' : 'bg-slate-700'
+                          }`}
                         >
-                          <ExternalLink className="w-3.5 h-3.5" />
-                          <span>Test Link</span>
-                        </a>
-                      )}
+                          <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                              settings.useCreemCheckout ? 'translate-x-7' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                        <span
+                          className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${
+                            settings.useCreemCheckout
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              : 'bg-slate-700 text-slate-400'
+                          }`}
+                        >
+                          {settings.useCreemCheckout ? 'مفعل' : 'معطل'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Creem Checkout URL Input */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-200 block">
+                        رابط الدفع من Creem.io (Checkout Link)
+                      </label>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <input
+                          type="url"
+                          placeholder="https://checkout.creem.io/p/prod_xxxx..."
+                          value={settings.creemCheckoutUrl || ''}
+                          onChange={(e) => updateSettings({ creemCheckoutUrl: e.target.value })}
+                          className="flex-1 px-3.5 py-2.5 text-sm bg-slate-900 border border-slate-700 rounded-xl text-white font-mono focus:outline-none focus:border-[#2A9D8F]"
+                        />
+                        <button
+                          onClick={() => showToast('Creem settings saved successfully!')}
+                          className="px-4 py-2.5 text-xs font-bold text-white bg-[#2A9D8F] hover:bg-[#218376] rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
+                        >
+                          <Check className="w-4 h-4" />
+                          <span>حفظ</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Creem Return URL */}
+                    <div className="p-4 rounded-xl bg-slate-900 border border-slate-700/80 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-semibold text-slate-200">
+                          رابط التحويل بعد الدفع في Creem:
+                        </label>
+                        <button
+                          onClick={() => {
+                            const url = `${window.location.origin}/?success=true`;
+                            navigator.clipboard.writeText(url);
+                            setCopiedSuccessUrl(true);
+                            showToast('Success URL copied to clipboard!');
+                            setTimeout(() => setCopiedSuccessUrl(false), 2500);
+                          }}
+                          className="text-xs text-[#2A9D8F] hover:text-[#218376] font-semibold flex items-center gap-1 cursor-pointer"
+                        >
+                          {copiedSuccessUrl ? 'تم النسخ!' : 'نسخ الرابط'}
+                        </button>
+                      </div>
+                      <div className="p-2 rounded bg-slate-950 border border-slate-800 font-mono text-xs text-emerald-400 select-all">
+                        {typeof window !== 'undefined' ? `${window.location.origin}/?success=true` : 'https://your-domain.netlify.app/?success=true'}
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                {/* Return / Success URL for Creem Dashboard */}
-                <div className="p-4 rounded-xl bg-slate-900 border border-slate-700/80 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                      <Globe className="w-3.5 h-3.5 text-[#E9C46A]" />
-                      <span>Return / Success URL (لإعدادها داخل منصة Creem):</span>
-                    </label>
-                    <button
-                      onClick={() => {
-                        const url = `${window.location.origin}/?success=true`;
-                        navigator.clipboard.writeText(url);
-                        setCopiedSuccessUrl(true);
-                        showToast('Success URL copied to clipboard!');
-                        setTimeout(() => setCopiedSuccessUrl(false), 2500);
-                      }}
-                      className="text-xs text-[#2A9D8F] hover:text-[#218376] font-semibold flex items-center gap-1 cursor-pointer"
-                    >
-                      {copiedSuccessUrl ? (
-                        <>
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3.5 h-3.5" />
-                          <span>Copy URL</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 font-mono text-xs text-emerald-400 break-all select-all">
-                    {typeof window !== 'undefined' ? `${window.location.origin}/?success=true` : 'https://your-domain.netlify.app/?success=true'}
-                  </div>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
-                    ضع هذا الرابط في خانة <strong>Success / Redirect URL</strong> في إعدادات المنتج داخل Creem.io. بعد أن يُتم العميل الدفع في Creem، سيتم تحويله تلقائياً لهذا الرابط ويبدأ تحميل كتاب PDF فوراً وبشكل تلقائي!
-                  </p>
-                </div>
-              </div>
-
-              {/* Step-by-Step Connection Guide */}
-              <div className="p-6 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-4">
-                <h4 className="text-sm font-bold text-white flex items-center gap-2 font-display">
-                  <span>دليل ربط Creem.io خطوة بخطوة / Step-by-Step Setup Guide</span>
-                </h4>
-
-                <div className="space-y-3 text-xs">
-                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-[#172B4D] text-[#E9C46A] font-bold flex items-center justify-center shrink-0 text-xs">
-                      1
-                    </div>
-                    <div>
-                      <strong className="text-white block mb-0.5">إنشاء حساب على Creem.io</strong>
-                      <span className="text-slate-400">
-                        توجه إلى <a href="https://www.creem.io" target="_blank" rel="noopener noreferrer" className="text-[#2A9D8F] underline">creem.io</a> وسجل حسابك، وقم بربط بيانات استلام الأموال (Bank Account / Stripe Connect).
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-[#172B4D] text-[#E9C46A] font-bold flex items-center justify-center shrink-0 text-xs">
-                      2
-                    </div>
-                    <div>
-                      <strong className="text-white block mb-0.5">إنشاء المنتج (Create Product)</strong>
-                      <span className="text-slate-400">
-                        من القائمة اضغط على <strong>Products</strong> ثم <strong>New Product</strong>:
-                      </span>
-                      <ul className="list-disc list-inside mt-1.5 space-y-0.5 text-slate-300">
-                        <li>اسم المنتج: <strong className="text-white">Smart Money eBook by QEVORIN</strong></li>
-                        <li>السعر: <strong className="text-white">$39.00 USD</strong> (One-time payment)</li>
-                        <li>نوع المنتج: <strong className="text-white">Digital Product / File</strong></li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-[#172B4D] text-[#E9C46A] font-bold flex items-center justify-center shrink-0 text-xs">
-                      3
-                    </div>
-                    <div>
-                      <strong className="text-white block mb-0.5">ضبط رابط التحويل بعد الدفع (Success Redirect URL)</strong>
-                      <span className="text-slate-400">
-                        في إعدادات المنتج داخل Creem، ابحث عن <strong>Redirect URL</strong> أو <strong>Success URL</strong> والصق الرابط المنسوخ أعلاه:
-                        <code className="block mt-1 text-emerald-400 font-mono text-[11px] bg-slate-950 p-1.5 rounded">
-                          {typeof window !== 'undefined' ? `${window.location.origin}/?success=true` : 'https://your-domain.netlify.app/?success=true'}
-                        </code>
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-[#172B4D] text-[#E9C46A] font-bold flex items-center justify-center shrink-0 text-xs">
-                      4
-                    </div>
-                    <div>
-                      <strong className="text-white block mb-0.5">نسخ رابط الدفع وتفعيله في موقعك</strong>
-                      <span className="text-slate-400">
-                        انسخ <strong>Checkout Link</strong> من صفحة المنتج في Creem، والصقه في خانة <strong>رابط الدفع من Creem.io</strong> أعلاه، وفعّل زر <strong>Active</strong> ثم اضغط <strong>Save Link</strong>.
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-700/60 flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-emerald-950 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-xs">
-                      ✓
-                    </div>
-                    <div>
-                      <strong className="text-white block mb-0.5">تجربة تجربة العميل (End-to-End Test)</strong>
-                      <span className="text-slate-400">
-                        عندما يضغط أي زائر على زر الشراء، سيُنقل لبوابة Creem الآمنة، وبمجرد إتمام الدفع سيعود لموقعك وستظهر له رسالة شكر فورية ويبدأ تنزيل كتاب Smart Money PDF مباشرة على جهازه!
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Simulation Button */}
-                <div className="pt-2 flex items-center justify-between border-t border-slate-700/60 text-xs">
-                  <span className="text-slate-400">
-                    اختبار شاشة تسليم الكتاب كما يراها العميل بعد الدفع:
-                  </span>
-                  <button
-                    onClick={() => {
-                      setIsAdminOpen(false);
-                      window.location.href = `${window.location.origin}/?success=true&payment_success=true`;
-                    }}
-                    className="px-3.5 py-2 text-xs font-semibold text-slate-200 hover:text-white bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Download className="w-3.5 h-3.5 text-[#E9C46A]" />
-                    <span>Test Customer Success Screen</span>
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -1208,7 +1469,7 @@ export const AdminDashboard: React.FC = () => {
                   Reset Store to Initial Defaults
                 </h3>
                 <p className="text-xs text-slate-400">
-                  This will restore the original pricing ($39), chapters, and initial FAQs from factory settings.
+                  This will restore the original pricing ($149), chapters, and initial FAQs from factory settings.
                 </p>
                 <button
                   onClick={() => {

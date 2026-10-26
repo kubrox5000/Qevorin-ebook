@@ -21,14 +21,14 @@ function LandingPageContent() {
   const [checkoutInitialStep, setCheckoutInitialStep] = useState<'checkout' | 'processing' | 'success'>('checkout');
   const [checkoutOrderId, setCheckoutOrderId] = useState<string>('');
   const [checkoutEmail, setCheckoutEmail] = useState<string>('');
-  const [checkoutSource, setCheckoutSource] = useState<'direct' | 'creem'>('direct');
+  const [checkoutSource, setCheckoutSource] = useState<'direct' | 'creem' | 'whop'>('direct');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewInitialChapter, setPreviewInitialChapter] = useState(0);
   const [activePolicy, setActivePolicy] = useState<PolicyType | null>(null);
 
   const { settings, setIsAdminOpen, addOrder } = useStore();
 
-  // Secret admin listener and Creem payment success return handler
+  // Secret admin listener and Whop / Creem payment success return handler
   useEffect(() => {
     const checkUrl = () => {
       const hash = window.location.hash.toLowerCase();
@@ -40,31 +40,54 @@ function LandingPageContent() {
         setIsAdminOpen(true);
       }
 
-      // Creem payment success redirect trigger
+      // Payment success redirect trigger (Whop, Creem, or standard success redirect)
       const isSuccess =
         params.get('success') === 'true' ||
         params.get('payment_success') === 'true' ||
         params.get('status') === 'success' ||
+        params.get('source') === 'whop' ||
         hash === '#success' ||
+        hash === '#whop-success' ||
         hash === '#download';
 
       if (isSuccess) {
-        const customerEmail = params.get('customer_email') || params.get('email') || '';
-        const customerName = params.get('customer_name') || 'Customer';
-        const orderRef = params.get('order_id') || `CREEM-${Math.floor(100000 + Math.random() * 900000)}`;
+        const sourceParam = params.get('source') || (hash.includes('whop') ? 'whop' : '');
+        const isWhopPayment =
+          sourceParam === 'whop' ||
+          settings.paymentGateway === 'whop' ||
+          settings.useWhopCheckout ||
+          params.has('whop') ||
+          params.get('provider') === 'whop';
+
+        const gatewayType: 'whop' | 'creem' = isWhopPayment ? 'whop' : 'creem';
+        const prefix = isWhopPayment ? 'WHOP' : 'CREEM';
+
+        const customerEmail =
+          params.get('customer_email') ||
+          params.get('email') ||
+          params.get('buyer_email') ||
+          '';
+        const customerName =
+          params.get('customer_name') ||
+          params.get('name') ||
+          'Customer';
+        const orderRef =
+          params.get('order_id') ||
+          params.get('payment_id') ||
+          `${prefix}-${Math.floor(100000 + Math.random() * 900000)}`;
 
         // Record in store
         const newId = addOrder({
           customerName: customerName,
-          customerEmail: customerEmail || 'customer@creem-checkout.com',
+          customerEmail: customerEmail || `customer@${gatewayType}-checkout.com`,
           amount: settings.price,
           currency: settings.currency,
           paymentMethod: 'card'
         });
 
-        setCheckoutOrderId(newId || orderRef);
+        setCheckoutOrderId(orderRef || newId);
         setCheckoutEmail(customerEmail);
-        setCheckoutSource('creem');
+        setCheckoutSource(gatewayType);
         setCheckoutInitialStep('success');
         setIsCheckoutOpen(true);
 
@@ -95,7 +118,7 @@ function LandingPageContent() {
       window.removeEventListener('hashchange', checkUrl);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [setIsAdminOpen, addOrder, settings.price, settings.currency]);
+  }, [setIsAdminOpen, addOrder, settings.price, settings.currency, settings.paymentGateway, settings.useWhopCheckout]);
 
   const handleOpenPreview = (initialChapterIndex: number = 0) => {
     setPreviewInitialChapter(initialChapterIndex);
@@ -103,10 +126,29 @@ function LandingPageContent() {
   };
 
   const handleOpenCheckout = () => {
-    if (settings.useCreemCheckout && settings.creemCheckoutUrl && settings.creemCheckoutUrl.trim()) {
+    // If Whop is active and configured
+    if (
+      (settings.paymentGateway === 'whop' || settings.useWhopCheckout) &&
+      settings.whopCheckoutUrl &&
+      settings.whopCheckoutUrl.trim() &&
+      settings.whopCheckoutUrl.startsWith('http')
+    ) {
+      window.location.href = settings.whopCheckoutUrl.trim();
+      return;
+    }
+
+    // If Creem is active and configured
+    if (
+      (settings.paymentGateway === 'creem' || settings.useCreemCheckout) &&
+      settings.creemCheckoutUrl &&
+      settings.creemCheckoutUrl.trim() &&
+      settings.creemCheckoutUrl.startsWith('http')
+    ) {
       window.location.href = settings.creemCheckoutUrl.trim();
       return;
     }
+
+    // Fallback to high-converting built-in modal (which also offers instant Whop link guidance)
     setIsCheckoutOpen(true);
   };
 
