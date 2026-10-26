@@ -68,7 +68,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-892144",
     customerName: "Alexander Wright",
     customerEmail: "alex.wright@outlook.com",
-    amount: 39,
+    amount: 149,
     currency: "USD",
     paymentMethod: "card",
     date: "2026-10-20 18:24",
@@ -79,7 +79,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-891902",
     customerName: "Sophie Taylor",
     customerEmail: "sophie.t@gmail.com",
-    amount: 39,
+    amount: 149,
     currency: "USD",
     paymentMethod: "apple",
     date: "2026-10-20 16:10",
@@ -90,7 +90,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-890451",
     customerName: "Marcus Vance",
     customerEmail: "marcus.vance@techcorp.io",
-    amount: 39,
+    amount: 149,
     currency: "USD",
     paymentMethod: "card",
     date: "2026-10-20 13:45",
@@ -101,7 +101,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-889120",
     customerName: "Elena Rostova",
     customerEmail: "elena.rostova@gmail.com",
-    amount: 39,
+    amount: 149,
     currency: "USD",
     paymentMethod: "paypal",
     date: "2026-10-20 10:05",
@@ -121,8 +121,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (parsed.supportEmail === 'service@qevorin.com' || !parsed.supportEmail) {
           parsed.supportEmail = 'support@qevorin.online';
         }
-        if (parsed.price === 49 || !parsed.price) {
-          parsed.price = 39;
+        if (parsed.price === 49 || parsed.price === 39 || !parsed.price) {
+          parsed.price = 149;
         }
         return { ...INITIAL_SETTINGS, ...parsed };
       }
