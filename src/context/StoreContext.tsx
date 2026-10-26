@@ -20,6 +20,7 @@ export interface SiteSettings extends ProductConfig {
   heroSubheadline: string;
   enableDiscounts: boolean;
   discountOriginalPrice: number;
+  priceVersion?: number;
   themePrimaryColor: string;
   themeAccentColor: string;
   creemCheckoutUrl: string;
@@ -57,6 +58,7 @@ const INITIAL_SETTINGS: SiteSettings = {
   heroSubheadline: "Discover a practical, beginner-friendly guide to budgeting, saving, and building healthier money habits—without complicated spreadsheets or overwhelming financial jargon.",
   enableDiscounts: true,
   discountOriginalPrice: 79,
+  priceVersion: 2,
   themePrimaryColor: "#172B4D",
   themeAccentColor: "#2A9D8F",
   creemCheckoutUrl: "",
@@ -68,7 +70,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-892144",
     customerName: "Alexander Wright",
     customerEmail: "alex.wright@outlook.com",
-    amount: 39,
+    amount: 149,
     currency: "USD",
     paymentMethod: "card",
     date: "2026-10-20 18:24",
@@ -79,7 +81,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-891902",
     customerName: "Sophie Taylor",
     customerEmail: "sophie.t@gmail.com",
-    amount: 39,
+    amount: 149,
     currency: "USD",
     paymentMethod: "apple",
     date: "2026-10-20 16:10",
@@ -90,7 +92,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-890451",
     customerName: "Marcus Vance",
     customerEmail: "marcus.vance@techcorp.io",
-    amount: 39,
+    amount: 149,
     currency: "USD",
     paymentMethod: "card",
     date: "2026-10-20 13:45",
@@ -101,7 +103,7 @@ const INITIAL_ORDERS: Order[] = [
     id: "QEV-889120",
     customerName: "Elena Rostova",
     customerEmail: "elena.rostova@gmail.com",
-    amount: 39,
+    amount: 149,
     currency: "USD",
     paymentMethod: "paypal",
     date: "2026-10-20 10:05",
@@ -121,8 +123,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (parsed.supportEmail === 'service@qevorin.com' || !parsed.supportEmail) {
           parsed.supportEmail = 'support@qevorin.online';
         }
-        if (parsed.price === 49 || !parsed.price) {
-          parsed.price = 39;
+        if (parsed.priceVersion !== 2 || !parsed.price) {
+          parsed.price = PRODUCT_CONFIG.price;
+          parsed.priceVersion = 2;
         }
         return { ...INITIAL_SETTINGS, ...parsed };
       }
